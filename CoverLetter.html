@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cover Letter Builder</title>
+<script>(function(){try{var s=localStorage.getItem('resumeBuilderThemeV1');if(s==='dark'||s==='light')document.documentElement.setAttribute('data-theme',s)}catch(e){}})();</script>
+<style>
+:root{--ink:#172033;--copy:#526073;--muted:#778295;--border:#dce2e9;--border-strong:#ced5df;--surface:#eef1f4;--surface-2:#f7f8fa;--paper:#fff;--accent:#9b6b2f;--accent-strong:#68431d;--accent-soft:#fff7ec;--danger:#a12b2b;--success:#1f7a4c;--saving:#8a5b22;--page-w:210mm;--page-h:297mm;color-scheme:light;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#e7ecf5;--copy:#b7c0d1;--muted:#8791a5;--border:#2c3648;--border-strong:#39445a;--surface:#0f1521;--surface-2:#212b3d;--paper:#1a2233;--accent:#d9a568;--accent-strong:#f0c187;--accent-soft:#2c2416;--danger:#e2857c;--success:#5cbf8e;--saving:#e0a552;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#e7ecf5;--copy:#b7c0d1;--muted:#8791a5;--border:#2c3648;--border-strong:#39445a;--surface:#0f1521;--surface-2:#212b3d;--paper:#1a2233;--accent:#d9a568;--accent-strong:#f0c187;--accent-soft:#2c2416;--danger:#e2857c;--success:#5cbf8e;--saving:#e0a552;color-scheme:dark}
+*{box-sizing:border-box}html,body{min-height:100%;margin:0;background:var(--surface)}button,input,textarea,select{font:inherit}button{cursor:pointer}[hidden]{display:none!important}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;padding:10px 18px;background:color-mix(in srgb,var(--paper) 96%,transparent);border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}
+.topbar-left,.topbar-actions{display:flex;align-items:center;gap:10px;min-width:0}.breadcrumb{display:flex;align-items:center;gap:7px;min-width:0;color:var(--muted);font-size:12px}.breadcrumb a{color:var(--copy);font-weight:750;text-decoration:none}.breadcrumb a:hover,.breadcrumb a:focus-visible{text-decoration:underline}.breadcrumb-name{max-width:220px;overflow:hidden;color:var(--ink);font-weight:750;text-overflow:ellipsis;white-space:nowrap}.save-status{color:var(--success);font-size:11px;font-weight:750}.save-status.saving{color:var(--saving)}.save-status.error{color:var(--danger)}
+.toolbar-button{min-height:38px;padding:8px 12px;color:var(--copy);background:var(--paper);border:1px solid var(--border);border-radius:7px;font-size:12px;font-weight:750}.toolbar-button:hover,.toolbar-button:focus-visible{background:var(--surface-2);border-color:var(--border-strong)}.toolbar-button.primary{color:#fff;background:#253248;border-color:#253248}
+.editor-layout{display:grid;grid-template-columns:360px minmax(0,1fr);min-height:calc(100vh - 64px)}.control-panel{position:sticky;top:64px;align-self:start;height:calc(100vh - 64px);overflow-y:auto;padding:16px;background:var(--surface-2);border-right:1px solid var(--border)}
+.panel-intro{padding:4px 2px 14px}.panel-intro h1{margin:0;font-size:20px;letter-spacing:-.02em}.panel-intro p{margin:5px 0 0;color:var(--copy);font-size:12px;line-height:1.5}.quality-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;overflow:hidden;margin-bottom:12px;background:var(--border);border:1px solid var(--border);border-radius:8px}.quality-item{padding:9px 6px;background:var(--paper);text-align:center}.quality-item strong{display:block;font-size:12px}.quality-item span{display:block;margin-top:2px;color:var(--muted);font-size:9px}
+details.editor-group{margin-bottom:10px;background:var(--paper);border:1px solid var(--border);border-radius:8px}details.editor-group>summary{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;cursor:pointer;font-size:13px;font-weight:800;list-style:none}details.editor-group>summary::-webkit-details-marker{display:none}details.editor-group>summary::after{content:"+";color:var(--muted);font-size:18px;font-weight:400}details.editor-group[open]>summary::after{content:"−"}.group-body{display:grid;gap:11px;padding:0 14px 14px;border-top:1px solid var(--border)}.group-note{margin:11px 0 -2px;color:var(--muted);font-size:10px;line-height:1.45}.field{display:grid;gap:5px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field label,.field-label{color:var(--copy);font-size:10px;font-weight:800}.field input,.field textarea,.field select{width:100%;min-height:38px;padding:9px 10px;color:var(--ink);background:var(--paper);border:1px solid var(--border-strong);border-radius:6px;outline:none;font-size:12px}.field textarea{min-height:70px;resize:vertical;line-height:1.5}.field input:focus,.field textarea:focus,.field select:focus,.field .is-target{border-color:var(--accent-strong);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.style-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.style-option{position:relative}.style-option input{position:absolute;opacity:0;pointer-events:none}.style-option span{display:grid;min-height:54px;place-items:center;padding:8px;color:var(--copy);background:var(--surface-2);border:1px solid var(--border);border-radius:7px;font-size:11px;font-weight:800}.style-option input:checked+span{color:var(--accent-strong);background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 50%,transparent)}.style-option input:focus-visible+span{outline:3px solid color-mix(in srgb,var(--accent) 18%,transparent)}.color-input{height:42px!important;padding:4px!important;cursor:pointer}
+.paragraph-list{display:grid;gap:9px;margin-top:11px}.paragraph-card{padding:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:7px}.paragraph-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.paragraph-heading strong{color:var(--copy);font-size:10px}.paragraph-actions{display:flex;gap:3px}.icon-button{display:grid;width:29px;height:29px;place-items:center;padding:0;color:var(--copy);background:var(--paper);border:1px solid var(--border-strong);border-radius:5px;font-size:12px;font-weight:800}.icon-button:hover,.icon-button:focus-visible{background:var(--surface)}.icon-button.danger{color:var(--danger)}.icon-button:disabled{opacity:.4;cursor:not-allowed}.add-button{width:100%;min-height:38px;margin-top:9px;color:var(--accent-strong);background:var(--accent-soft);border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:7px;font-size:11px;font-weight:800}
+.preview-area{min-width:0;padding:34px;overflow:auto;background:var(--surface)}.letter-page{--letter-accent:#6b7280;width:min(var(--page-w),100%);min-height:var(--page-h);margin:0 auto;padding:16mm 20mm 18mm;color:#535f70;background:#fff;box-shadow:0 14px 40px rgba(30,39,54,.14);font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.72}.letter-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:20px}.letter-name{margin:0;color:#101010;font-family:Georgia,"Times New Roman",serif;font-size:25pt;line-height:1.1;letter-spacing:-.025em}.letter-date{padding-top:4px;color:#303949;font-size:10pt;font-weight:800;white-space:nowrap}.sender-address{margin-top:8px;white-space:pre-line;font-size:8.5pt;line-height:1.45}.sender-contact{margin-top:8px;font-size:8.5pt}.letter-rule{height:1px;margin:13px 0 20px;background:color-mix(in srgb,var(--letter-accent) 28%,#d7dce3)}.recipient-block{margin-bottom:17px;white-space:pre-line}.letter-greeting{margin:0 0 17px}.letter-body p{margin:0 0 17px;text-align:justify}.letter-closing{margin-top:20px;white-space:pre-line}.editable-preview{border-radius:3px;cursor:pointer;outline:0}.editable-preview:hover{background:color-mix(in srgb,var(--letter-accent) 8%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--letter-accent) 8%,transparent)}.editable-preview:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--letter-accent) 24%,transparent)}.letter-page.modern .letter-name{color:var(--letter-accent);font-family:"Segoe UI",Arial,sans-serif;font-weight:800}.letter-page.modern .letter-rule{height:3px;background:var(--letter-accent)}.letter-page.modern .letter-body p{text-align:left}.empty-text{color:#9aa3b1;font-style:italic}.toast{position:fixed;right:20px;bottom:20px;z-index:100;max-width:360px;padding:12px 15px;color:#fff;background:#202a3a;border-radius:8px;box-shadow:0 12px 30px rgba(23,32,51,.22);font-size:12px}
+@media(max-width:900px){.topbar{align-items:flex-start;flex-direction:column}.topbar-actions{width:100%;overflow-x:auto}.editor-layout{grid-template-columns:1fr}.control-panel{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border)}.preview-area{padding:18px 10px}.letter-page{min-height:0;padding:10vw 9vw;font-size:clamp(8.5pt,2.7vw,10.5pt)}.letter-name{font-size:clamp(18pt,6vw,25pt)}}
+@media(max-width:520px){.breadcrumb-name,.save-status{display:none}.toolbar-button{flex:0 0 auto}.field-row{grid-template-columns:1fr}.letter-header{grid-template-columns:1fr;gap:4px}.letter-date{padding:0}}
+@media print{body{background:#fff}.topbar,.control-panel,.toast{display:none!important}.editor-layout{display:block;min-height:0}.preview-area{padding:0;overflow:visible;background:#fff}.letter-page{width:var(--page-w);min-height:var(--page-h);margin:0;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}.editable-preview:hover{background:transparent;box-shadow:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<style id="pageSizeStyle">@page { size: 210mm 297mm; margin: 0; }</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-left"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html#cover-letter">Cover Letters</a><span aria-hidden="true">/</span><span class="breadcrumb-name" id="breadcrumbName">Cover Letter</span></nav><span class="save-status" id="saveStatus" role="status" aria-live="polite">Saved</span></div>
+  <div class="topbar-actions" aria-label="Cover letter actions"><button class="toolbar-button" id="themeToggleButton" type="button"><span id="themeToggleLabel">Dark mode</span></button><button class="toolbar-button" id="resetButton" type="button">Reset</button><button class="toolbar-button" id="downloadHtmlButton" type="button">Editable HTML</button><button class="toolbar-button primary" id="printButton" type="button">Download PDF</button></div>
+</header>
+<main class="editor-layout">
+<aside class="control-panel" aria-label="Cover letter editor">
+  <div class="panel-intro"><h1>Cover Letter Editor</h1><p>Tailor the details and paragraphs for this job. Changes save automatically.</p></div>
+  <div class="quality-strip" aria-label="Letter summary"><div class="quality-item"><strong id="wordCount">0</strong><span>words</span></div><div class="quality-item"><strong id="paragraphCount">0</strong><span>paragraphs</span></div><div class="quality-item"><strong id="pageGuidance">On target</strong><span>one-page goal</span></div></div>
+  <details class="editor-group" open><summary>File and style</summary><div class="group-body">
+    <p class="group-note">Use a recognizable name, such as “Magna Packaging Coordinator.”</p>
+    <div class="field"><label for="fileName">File name</label><input id="fileName" type="text" maxlength="120" autocomplete="off"></div>
+    <span class="field-label">Layout</span><div class="style-options"><label class="style-option"><input type="radio" name="letterStyle" value="classic" checked><span>Classic</span></label><label class="style-option"><input type="radio" name="letterStyle" value="modern"><span>Modern</span></label></div>
+    <span class="field-label">Page size</span><div class="style-options"><label class="style-option"><input type="radio" name="pageSize" value="a4" checked><span>A4</span></label><label class="style-option"><input type="radio" name="pageSize" value="letter"><span>Letter (US)</span></label></div>
+    <div class="field"><label for="accentColor">Accent color</label><input class="color-input" id="accentColor" type="color" value="#6b7280"></div>
+  </div></details>
+  <details class="editor-group" open><summary>Your details</summary><div class="group-body">
+    <p class="group-note">New letters use fields marked “Include” in My Info. Edits here only affect this letter.</p>
+    <div class="field"><label for="fullName">Full name</label><input id="fullName" data-field="fullName" type="text" autocomplete="name"></div>
+    <div class="field"><label for="letterDate">Date</label><input id="letterDate" data-field="date" type="date"></div>
+    <div class="field"><label for="senderAddress">Address</label><textarea id="senderAddress" data-field="address" rows="3" autocomplete="street-address"></textarea></div>
+    <div class="field-row"><div class="field"><label for="phone">Phone</label><input id="phone" data-field="phone" type="tel" autocomplete="tel"></div><div class="field"><label for="email">Email</label><input id="email" data-field="email" type="email" autocomplete="email"></div></div>
+    <div class="field-row"><div class="field"><label for="linkedin">LinkedIn</label><input id="linkedin" data-field="linkedin" type="url" inputmode="url" placeholder="Optional"></div><div class="field"><label for="additionalLink">Website</label><input id="additionalLink" data-field="additionalLink" type="url" inputmode="url" placeholder="Optional"></div></div>
+  </div></details>
+  <details class="editor-group" open><summary>Job and recipient</summary><div class="group-body">
+    <p class="group-note">Recipient lines appear above the greeting only when supplied. Job notes are private.</p>
+    <div class="field"><label for="jobTitle">Job title</label><input id="jobTitle" data-job-field="title" type="text" placeholder="Packaging Coordinator"></div>
+    <div class="field"><label for="company">Company</label><input id="company" data-field="company" data-job-field="company" type="text" autocomplete="organization" placeholder="Company name"></div>
+    <div class="field"><label for="recipientName">Hiring manager</label><input id="recipientName" data-field="recipientName" data-job-field="hiringManager" type="text" placeholder="Hiring Manager"></div>
+    <div class="field"><label for="recipientTitle">Recipient title</label><input id="recipientTitle" data-field="recipientTitle" type="text" placeholder="Optional"></div>
+    <div class="field"><label for="companyAddress">Company address</label><textarea id="companyAddress" data-field="companyAddress" rows="2" placeholder="Optional"></textarea></div>
+    <div class="field"><label for="greeting">Greeting</label><input id="greeting" data-field="greeting" type="text" placeholder="Dear Hiring Manager,"></div>
+    <div class="field"><label for="jobDescription">Job notes or description</label><textarea id="jobDescription" data-job-field="description" rows="4" placeholder="Paste key requirements here for reference. This is not shown in the letter."></textarea></div>
+  </div></details>
+  <details class="editor-group" open><summary>Letter body</summary><div class="group-body"><p class="group-note">Aim for 250–400 words. Use specific examples and tailor each paragraph.</p><div class="paragraph-list" id="paragraphList"></div><button class="add-button" id="addParagraphButton" type="button">+ Add paragraph</button></div></details>
+  <details class="editor-group" open><summary>Closing</summary><div class="group-body"><div class="field"><label for="signoff">Sign-off</label><input id="signoff" data-field="signoff" type="text" placeholder="Sincerely,"></div><div class="field"><label for="signatureName">Signature name</label><input id="signatureName" data-field="signatureName" type="text" autocomplete="name"></div></div></details>
+</aside>
+<section class="preview-area" aria-label="Cover letter preview">
+  <article class="letter-page classic" id="letterPage" aria-label="Cover letter page">
+    <header class="letter-header"><h2 class="letter-name editable-preview" id="previewName" data-focus="fullName" tabindex="0"></h2><time class="letter-date editable-preview" id="previewDate" data-focus="letterDate" tabindex="0"></time></header>
+    <div class="sender-address editable-preview" id="previewAddress" data-focus="senderAddress" tabindex="0"></div><div class="sender-contact editable-preview" id="previewContact" data-focus="phone" tabindex="0"></div><div class="letter-rule" aria-hidden="true"></div>
+    <div class="recipient-block editable-preview" id="previewRecipient" data-focus="recipientName" tabindex="0" hidden></div><p class="letter-greeting editable-preview" id="previewGreeting" data-focus="greeting" tabindex="0"></p><div class="letter-body" id="previewBody"></div><div class="letter-closing editable-preview" id="previewSignoff" data-focus="signoff" tabindex="0"></div><div class="editable-preview" id="previewSignature" data-focus="signatureName" tabindex="0"></div>
+  </article>
+</section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script id="embeddedState">window.__COVER_LETTER_STATE__=null;</script>
+<script>
+const LIBRARY_KEY='coverLetterBuilderLibraryV1',AUTOSAVE_KEY='coverLetterBuilderAutosaveV1',PROFILE_KEY='resumeBuilderProfileV1';
+const PROFILE_FIELDS=['firstName','lastName','phone','email','linkedin','additionalLink','street','city','state','country','postalCode'];
+const $=id=>document.getElementById(id),activeId=new URLSearchParams(location.search).get('letter');
+const c={fileName:$('fileName'),fullName:$('fullName'),date:$('letterDate'),address:$('senderAddress'),phone:$('phone'),email:$('email'),linkedin:$('linkedin'),additionalLink:$('additionalLink'),company:$('company'),recipientName:$('recipientName'),recipientTitle:$('recipientTitle'),companyAddress:$('companyAddress'),greeting:$('greeting'),signoff:$('signoff'),signatureName:$('signatureName'),jobTitle:$('jobTitle'),jobDescription:$('jobDescription'),accentColor:$('accentColor'),paragraphList:$('paragraphList'),page:$('letterPage'),status:$('saveStatus'),crumb:$('breadcrumbName')};
+let storageUnavailable=false,saveTimer=0,toastTimer=0,state,trashedNoticeShown=false;
+const THEME_STORAGE_KEY='resumeBuilderThemeV1';
+function storedThemePreference(){try{const s=localStorage.getItem(THEME_STORAGE_KEY);return s==='dark'||s==='light'?s:null}catch(e){return null}}
+function effectiveTheme(){return storedThemePreference()||(window.matchMedia?.('(prefers-color-scheme: dark)').matches?'dark':'light')}
+function syncThemeToggleUI(){const isDark=effectiveTheme()==='dark';$('themeToggleButton').setAttribute('aria-pressed',String(isDark));$('themeToggleLabel').textContent=isDark?'Light mode':'Dark mode'}
+function applyStoredTheme(){const p=storedThemePreference();if(p)document.documentElement.setAttribute('data-theme',p);else document.documentElement.removeAttribute('data-theme');syncThemeToggleUI()}
+function toggleTheme(){const next=effectiveTheme()==='dark'?'light':'dark';try{localStorage.setItem(THEME_STORAGE_KEY,next)}catch(e){}document.documentElement.setAttribute('data-theme',next);syncThemeToggleUI()}
+
+function uid(){return typeof crypto?.randomUUID==='function'?crypto.randomUUID():`cover-${Date.now()}-${Math.random().toString(16).slice(2)}`}
+function clone(v){return typeof structuredClone==='function'?structuredClone(v):JSON.parse(JSON.stringify(v))}
+function getStore(k){try{return localStorage?.getItem(k)??null}catch(e){storageUnavailable=true;return null}}
+function setStore(k,v){try{if(!localStorage)return false;localStorage.setItem(k,v);return true}catch(e){storageUnavailable=true;return false}}
+function cleanName(v,fallback='Untitled Cover Letter'){return String(v||'').trim().replace(/\s+/g,' ').slice(0,120)||fallback}
+function localDate(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+const PAGE_SIZES={a4:{w:'210mm',h:'297mm',css:'210mm 297mm'},letter:{w:'215.9mm',h:'279.4mm',css:'215.9mm 279.4mm'}};
+const LETTER_PAPER_REGIONS=new Set(['US','CA','MX','PH','CL','CO','VE','GT','PR','DO','PA','CR']);
+function guessDefaultPageSize(){try{const locale=Intl.DateTimeFormat().resolvedOptions().locale||navigator.language||'';let region='';if(typeof Intl.Locale==='function')region=new Intl.Locale(locale).region||'';if(!region){const match=locale.match(/-([A-Z]{2}|\d{3})(?=-|$)/i);region=match?match[1]:''}return region&&LETTER_PAPER_REGIONS.has(region.toUpperCase())?'letter':'a4'}catch(e){return 'a4'}}
+
+function readProfile(){
+  let source={};try{source=JSON.parse(getStore(PROFILE_KEY)||'null')||{}}catch(e){}
+  const p=Object.fromEntries(PROFILE_FIELDS.map(k=>[k,typeof source[k]==='string'?source[k]:'']));
+  p.includeFields=Object.fromEntries(PROFILE_FIELDS.map(k=>[k,typeof source.includeFields?.[k]==='boolean'?source.includeFields[k]:!['street','postalCode'].includes(k)]));
+  return p;
+}
+
+function blankState(){
+  const p=readProfile(),inc=k=>p.includeFields[k]!==false;
+  const name=['firstName','lastName'].filter(inc).map(k=>p[k]).filter(Boolean).join(' ').trim();
+  const city=['city','state','postalCode'].filter(inc).map(k=>p[k]).filter(Boolean).join(', ');
+  const address=[inc('street')?p.street:'',city,inc('country')?p.country:''].filter(Boolean).join('\n');
+  return {version:1,savedAt:new Date().toISOString(),fileName:name?`${name} Cover Letter`:'Untitled Cover Letter',letterStyle:'classic',accentColor:'#6b7280',pageSize:guessDefaultPageSize(),fields:{fullName:name||'Enter your full name',date:localDate(),address:address||'Enter your address',phone:inc('phone')?(p.phone||'Enter phone number'):'',email:inc('email')?(p.email||'Enter email address'):'',linkedin:inc('linkedin')?(p.linkedin||''):'',additionalLink:inc('additionalLink')?(p.additionalLink||''):'',company:'',recipientName:'Hiring Manager',recipientTitle:'',companyAddress:'',greeting:'Dear Hiring Manager,',signoff:'Sincerely,',signatureName:name||'Enter your full name'},paragraphs:[
+    {id:uid(),text:'Enter an opening paragraph that names the position, shows enthusiasm, and summarizes why you are a strong match.'},
+    {id:uid(),text:'Enter a focused example from your experience. Explain the challenge, the action you took, and the measurable result most relevant to this job.'},
+    {id:uid(),text:'Enter another relevant strength, achievement, or connection to the company. Keep the details specific and avoid repeating your resume.'},
+    {id:uid(),text:'Enter a concise closing paragraph that reinforces your interest, thanks the reader, and invites a conversation.'}
+  ],jobInfo:{title:'',company:'',hiringManager:'',description:''}};
+}
+
+function normalizeText(value,fallback=''){return typeof value==='string'?value:fallback}
+function normalizeState(v){
+  const b=blankState(),s=v&&typeof v==='object'?v:{},sourceFields=s.fields&&typeof s.fields==='object'?s.fields:{},sourceJob=s.jobInfo&&typeof s.jobInfo==='object'?s.jobInfo:{};
+  const fields=Object.fromEntries(Object.entries(b.fields).map(([key,fallback])=>[key,normalizeText(sourceFields[key],fallback)]));
+  const jobInfo=Object.fromEntries(Object.entries(b.jobInfo).map(([key,fallback])=>[key,normalizeText(sourceJob[key],fallback)]));
+  return {...b,...s,fileName:cleanName(s.fileName,b.fileName),letterStyle:s.letterStyle==='modern'?'modern':'classic',accentColor:/^#[0-9a-f]{6}$/i.test(s.accentColor||'')?s.accentColor:b.accentColor,pageSize:PAGE_SIZES[s.pageSize]?s.pageSize:b.pageSize,sourceResumeId:typeof s.sourceResumeId==='string'&&s.sourceResumeId?s.sourceResumeId:null,fields,paragraphs:Array.isArray(s.paragraphs)&&s.paragraphs.length?s.paragraphs.filter(x=>x&&typeof x==='object').map(x=>({id:typeof x.id==='string'&&x.id?x.id:uid(),text:normalizeText(x.text)})):b.paragraphs,jobInfo};
+}
+
+function readLibrary(){
+  const raw=getStore(LIBRARY_KEY);
+  try{const v=JSON.parse(raw||'null');if(v?.version===1&&Array.isArray(v.letters))return{version:1,letters:v.letters.filter(x=>x&&typeof x==='object')}}catch(e){}
+  if(raw)setStore(`${LIBRARY_KEY}_recovery`,raw);
+  return{version:1,letters:[]};
+}
+function libraryState(id){if(!id)return null;const r=readLibrary().letters.find(x=>x?.id===id&&!x.trashedAt);return r?.state||null}
+function standaloneState(){const raw=getStore(AUTOSAVE_KEY);try{return JSON.parse(raw||'null')}catch(e){if(raw)setStore(`${AUTOSAVE_KEY}_recovery`,raw);return null}}
+
+function populate(){
+  c.fileName.value=state.fileName;c.fullName.value=state.fields.fullName;c.date.value=state.fields.date;c.address.value=state.fields.address;c.phone.value=state.fields.phone;c.email.value=state.fields.email;c.linkedin.value=state.fields.linkedin||'';c.additionalLink.value=state.fields.additionalLink||'';c.company.value=state.fields.company;c.recipientName.value=state.fields.recipientName;c.recipientTitle.value=state.fields.recipientTitle;c.companyAddress.value=state.fields.companyAddress;c.greeting.value=state.fields.greeting;c.signoff.value=state.fields.signoff;c.signatureName.value=state.fields.signatureName;c.jobTitle.value=state.jobInfo.title;c.jobDescription.value=state.jobInfo.description;c.accentColor.value=state.accentColor;
+  document.querySelector(`input[name="letterStyle"][value="${state.letterStyle}"]`).checked=true;
+  document.querySelector(`input[name="pageSize"][value="${state.pageSize}"]`).checked=true;
+  renderParagraphEditors();renderPreview();
+  if(storageUnavailable){c.status.textContent='Saving unavailable';c.status.className='save-status error'}
+}
+
+function collect(){
+  const paragraphs=Array.from(c.paragraphList.querySelectorAll('[data-paragraph-id]')).map(card=>({id:card.dataset.paragraphId,text:card.querySelector('textarea').value}));
+  return normalizeState({...state,fileName:cleanName(c.fileName.value),letterStyle:document.querySelector('input[name="letterStyle"]:checked')?.value||'classic',pageSize:document.querySelector('input[name="pageSize"]:checked')?.value||'a4',accentColor:c.accentColor.value,fields:{fullName:c.fullName.value,date:c.date.value,address:c.address.value,phone:c.phone.value,email:c.email.value,linkedin:c.linkedin.value,additionalLink:c.additionalLink.value,company:c.company.value,recipientName:c.recipientName.value,recipientTitle:c.recipientTitle.value,companyAddress:c.companyAddress.value,greeting:c.greeting.value,signoff:c.signoff.value,signatureName:c.signatureName.value},paragraphs,jobInfo:{title:c.jobTitle.value,company:c.company.value,hiringManager:c.recipientName.value,description:c.jobDescription.value}});
+}
+
+function text(el,value,fallback){const valueText=String(value||'').trim();el.textContent=valueText||fallback;el.classList.toggle('empty-text',!valueText)}
+function formatLetterDate(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return '';const [y,m,d]=value.split('-').map(Number),parsed=new Date(y,m-1,d);if(parsed.getFullYear()!==y||parsed.getMonth()!==m-1||parsed.getDate()!==d)return '';return new Intl.DateTimeFormat(undefined,{month:'long',day:'numeric',year:'numeric'}).format(parsed)}
+function renderPreview(){
+  state=collect();c.page.className=`letter-page ${state.letterStyle}`;c.page.style.setProperty('--letter-accent',state.accentColor);c.crumb.textContent=state.fileName;document.title=`${state.fileName} – Cover Letter Builder`;
+  const pageSize=PAGE_SIZES[state.pageSize]?state.pageSize:'a4';document.documentElement.style.setProperty('--page-w',PAGE_SIZES[pageSize].w);document.documentElement.style.setProperty('--page-h',PAGE_SIZES[pageSize].h);const pageSizeStyleEl=$('pageSizeStyle');if(pageSizeStyleEl)pageSizeStyleEl.textContent=`@page { size: ${PAGE_SIZES[pageSize].css}; margin: 0; }`;
+  text($('previewName'),state.fields.fullName,'Enter your full name');const previewDateEl=$('previewDate');text(previewDateEl,formatLetterDate(state.fields.date),'Enter date');if(state.fields.date)previewDateEl.setAttribute('datetime',state.fields.date);else previewDateEl.removeAttribute('datetime');text($('previewAddress'),state.fields.address,'Enter your address');
+  const contact=[state.fields.phone,state.fields.email,state.fields.linkedin,state.fields.additionalLink].filter(Boolean).join('  |  ');text($('previewContact'),contact,'Enter contact details');
+  const namedRecipient=state.fields.recipientName.trim().toLowerCase()==='hiring manager'?'':state.fields.recipientName;const recipient=[namedRecipient,state.fields.recipientTitle,state.fields.company,state.fields.companyAddress].filter(Boolean).join('\n');$('previewRecipient').hidden=!recipient;$('previewRecipient').textContent=recipient;
+  text($('previewGreeting'),state.fields.greeting,'Dear Hiring Manager,');
+  $('previewBody').replaceChildren();state.paragraphs.forEach((p,i)=>{const el=document.createElement('p');el.className='editable-preview';el.tabIndex=0;el.dataset.paragraphFocus=p.id;el.textContent=p.text.trim()||`Enter paragraph ${i+1}`;el.classList.toggle('empty-text',!p.text.trim());$('previewBody').append(el)});
+  text($('previewSignoff'),state.fields.signoff,'Sincerely,');text($('previewSignature'),state.fields.signatureName,state.fields.fullName||'Enter your name');updateQuality();
+}
+
+function actionButton(label,symbol,handler,danger=false){const b=document.createElement('button');b.type='button';b.className=`icon-button${danger?' danger':''}`;b.setAttribute('aria-label',label);b.textContent=symbol;b.addEventListener('click',handler);return b}
+function renderParagraphEditors(focusId=''){
+  c.paragraphList.replaceChildren();state.paragraphs.forEach((p,i)=>{const card=document.createElement('div');card.className='paragraph-card';card.dataset.paragraphId=p.id;const head=document.createElement('div');head.className='paragraph-heading';const title=document.createElement('strong');title.textContent=`Paragraph ${i+1}`;const actions=document.createElement('div');actions.className='paragraph-actions';const up=actionButton(`Move paragraph ${i+1} up`,'↑',()=>moveParagraph(p.id,-1)),down=actionButton(`Move paragraph ${i+1} down`,'↓',()=>moveParagraph(p.id,1)),remove=actionButton(`Remove paragraph ${i+1}`,'×',()=>removeParagraph(p.id),true);up.disabled=i===0;down.disabled=i===state.paragraphs.length-1;remove.disabled=state.paragraphs.length===1;actions.append(up,down,remove);head.append(title,actions);const area=document.createElement('textarea');area.rows=6;area.value=p.text;area.setAttribute('aria-label',`Paragraph ${i+1}`);area.addEventListener('input',changed);card.append(head,area);c.paragraphList.append(card)});
+  if(focusId)requestAnimationFrame(()=>c.paragraphList.querySelector(`[data-paragraph-id="${CSS.escape(focusId)}"] textarea`)?.focus());
+}
+function addParagraph(){state=collect();const p={id:uid(),text:'Enter a new paragraph with a specific, job-relevant example.'};state.paragraphs.push(p);renderParagraphEditors(p.id);renderPreview();scheduleSave()}
+function moveParagraph(id,delta){state=collect();const from=state.paragraphs.findIndex(p=>p.id===id),to=from+delta;if(from<0||to<0||to>=state.paragraphs.length)return;const item=state.paragraphs.splice(from,1)[0];state.paragraphs.splice(to,0,item);renderParagraphEditors(id);renderPreview();scheduleSave()}
+function removeParagraph(id){state=collect();if(state.paragraphs.length<2)return;state.paragraphs=state.paragraphs.filter(p=>p.id!==id);renderParagraphEditors();renderPreview();scheduleSave()}
+function updateQuality(){const body=state.paragraphs.map(p=>p.text).join(' ').trim(),words=body?body.split(/\s+/).length:0;$('wordCount').textContent=words;$('paragraphCount').textContent=state.paragraphs.length;$('pageGuidance').textContent=words>400?'Too long':words<250?'Add detail':'On target'}
+function changed(){renderPreview();scheduleSave()}
+function scheduleSave(){c.status.textContent='Unsaved changes';c.status.className='save-status saving';clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,450)}
+function saveNow(){
+  saveTimer=0;state=collect();state.savedAt=new Date().toISOString();let ok=false;
+  if(activeId){
+    const lib=readLibrary(),now=new Date().toISOString();
+    let r=lib.letters.find(x=>x?.id===activeId);
+    if(r?.trashedAt){
+      // Trashed elsewhere (e.g. another tab) while this editor was still open.
+      // Never resurrect or overwrite trashed content — fall back to the
+      // standalone autosave slot instead of clobbering the trashed letter.
+      ok=setStore(AUTOSAVE_KEY,JSON.stringify(state));
+      if(!trashedNoticeShown){trashedNoticeShown=true;showToast('This letter was deleted elsewhere — your changes are being saved separately instead.')}
+    }else{
+      if(!r){
+        // Never recreate a letter that was permanently deleted in another tab.
+        if(openedExistingLetter){ok=setStore(AUTOSAVE_KEY,JSON.stringify(state));if(!trashedNoticeShown){trashedNoticeShown=true;showToast('This letter was deleted elsewhere — your changes are being saved separately instead.')}c.status.textContent=ok?'Saved separately':'Could not save';c.status.className=ok?'save-status':'save-status error';return}
+        r={id:activeId,createdAt:now,trashedAt:null};lib.letters.push(r)
+      }
+      r.fileName=state.fileName;r.editedAt=now;r.state=clone(state);
+      ok=setStore(LIBRARY_KEY,JSON.stringify(lib));
+    }
+  }else{
+    ok=setStore(AUTOSAVE_KEY,JSON.stringify(state));
+  }
+  c.status.textContent=ok?'Saved':'Could not save';c.status.className=ok?'save-status':'save-status error'
+}
+
+function focusInput(target){const id=target.dataset.focus,pid=target.dataset.paragraphFocus;const input=id?$(id):pid?c.paragraphList.querySelector(`[data-paragraph-id="${CSS.escape(pid)}"] textarea`):null;if(!input)return;input.closest('details')?.setAttribute('open','');input.focus();input.classList.add('is-target');setTimeout(()=>input.classList.remove('is-target'),900);input.scrollIntoView({behavior:'smooth',block:'center'})}
+function resetLetter(){if(!confirm('Reset this cover letter? Your current letter will be replaced with a fresh, prompt-filled draft using My Info.'))return;state=blankState();populate();saveNow();showToast('Cover letter reset')}
+function safeFile(v){const name=cleanName(v).normalize('NFKC').replace(/[<>:"/\\|?*\x00-\x1F]/g,' ').replace(/\s+/g,' ').trim().replace(/[. ]+$/g,'').slice(0,120)||'Cover Letter';return /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)?`${name}_Cover_Letter`.slice(0,120):name}
+function downloadHtml(){state=collect();const replacement=`<script id="embeddedState">window.__COVER_LETTER_STATE__=${JSON.stringify(state).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029')};<\/script>`;const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML.replace(/<script id="embeddedState">[\s\S]*?<\/script>/,replacement).replace(/(<html[^>]*?)\s+data-theme="[^"]*"/i,'$1');const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`${safeFile(state.fileName)}.html`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function showToast(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>{$('toast').hidden=true},4500)}
+
+const initialLibraryState=libraryState(activeId),openedExistingLetter=Boolean(initialLibraryState);
+state=normalizeState(window.__COVER_LETTER_STATE__||initialLibraryState||(!activeId?standaloneState():null)||blankState());populate();
+document.querySelectorAll('input[data-field],textarea[data-field],input[data-job-field],textarea[data-job-field],#fileName,#accentColor,input[name="letterStyle"],input[name="pageSize"]').forEach(el=>{el.addEventListener('input',changed);if(el.matches('input[type="radio"]'))el.addEventListener('change',changed)});
+$('addParagraphButton').addEventListener('click',addParagraph);$('resetButton').addEventListener('click',resetLetter);$('downloadHtmlButton').addEventListener('click',downloadHtml);$('printButton').addEventListener('click',()=>{renderPreview();if(saveTimer){clearTimeout(saveTimer);saveNow()}print()});
+document.querySelector('.preview-area').addEventListener('click',e=>{const target=e.target.closest('[data-focus],[data-paragraph-focus]');if(target)focusInput(target)});document.querySelector('.preview-area').addEventListener('keydown',e=>{if(!['Enter',' '].includes(e.key))return;const target=e.target.closest('[data-focus],[data-paragraph-focus]');if(target){e.preventDefault();focusInput(target)}});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();clearTimeout(saveTimer);saveNow()}});addEventListener('beforeunload',()=>{if(saveTimer){clearTimeout(saveTimer);saveNow()}});
+$('themeToggleButton').addEventListener('click',toggleTheme);applyStoredTheme();window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!storedThemePreference())syncThemeToggleUI()});window.addEventListener('storage',e=>{if(e.key===THEME_STORAGE_KEY)applyStoredTheme()});
+</script>
+</body>
+</html>
