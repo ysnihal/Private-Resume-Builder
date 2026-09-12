@@ -70,6 +70,18 @@ Inside `backend/`:
 
 Gemini's free tier is limited (as of writing, `gemini-3.6-flash` allows about 20 requests per day, per Google's own error responses - verify current limits at [ai.google.dev/gemini-api/docs/rate-limits](https://ai.google.dev/gemini-api/docs/rate-limits), since free-tier terms change). Hitting it shows a clear in-app message rather than a crash; the rest of the app keeps working normally.
 
+## Deploying (Render, free tier)
+
+This repo includes `render.yaml`, a Blueprint Render reads automatically:
+
+1. Push this repo to GitHub (already done if you're reading this from there).
+2. On [render.com](https://render.com), sign up/log in, then **New +** → **Blueprint**.
+3. Connect this GitHub repo. Render reads `render.yaml` and pre-fills the service.
+4. It will prompt for the env vars marked secret in `render.yaml` (at minimum `GEMINI_API_KEY`) - paste in your real key. These are stored by Render, not in the repo.
+5. Deploy. Once live, Render gives you a URL like `https://career-studio.onrender.com` - open `<that-url>/index.html`.
+
+Free-tier services on Render sleep after inactivity and take ~30-60 seconds to wake on the next request - normal, not a bug.
+
 ## Running Tests
 
 ```
