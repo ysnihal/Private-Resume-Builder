@@ -1,0 +1,7 @@
+backend/.env
+backend/usage_log.jsonl
+__pycache__/
+*.pyc
+.claude/
+# The virtual environment now lives outside this folder, at
+# C:\dev\venvs\career-studio - see the note in the project chat/README for why.
