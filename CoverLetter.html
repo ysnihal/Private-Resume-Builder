@@ -23,6 +23,7 @@ details.editor-group{margin-bottom:10px;background:var(--paper);border:1px solid
 @media(max-width:520px){.breadcrumb-name,.save-status{display:none}.toolbar-button{flex:0 0 auto}.field-row{grid-template-columns:1fr}.letter-header{grid-template-columns:1fr;gap:4px}.letter-date{padding:0}}
 @media print{body{background:#fff}.topbar,.control-panel,.toast{display:none!important}.editor-layout{display:block;min-height:0}.preview-area{padding:0;overflow:visible;background:#fff}.letter-page{width:var(--page-w);min-height:var(--page-h);margin:0;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}.editable-preview:hover{background:transparent;box-shadow:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+.ai-preview-dialog{max-width:560px;width:92vw;padding:0;color:var(--ink);background:var(--paper);border:1px solid var(--border);border-radius:10px}.ai-preview-dialog::backdrop{background:rgba(15,20,30,.45)}.ai-preview-body{display:grid;gap:12px;padding:18px}.ai-preview-body h2{margin:0;font-size:16px}.ai-preview-body>p{margin:0;color:var(--copy);font-size:11px;line-height:1.5}.ai-preview-list{display:grid;gap:11px;max-height:50vh;overflow-y:auto}.ai-preview-actions{display:flex;justify-content:flex-end;gap:8px}
 </style>
 <style id="pageSizeStyle">@page { size: 210mm 297mm; margin: 0; }</style>
 </head>
@@ -60,7 +61,7 @@ details.editor-group{margin-bottom:10px;background:var(--paper);border:1px solid
     <div class="field"><label for="greeting">Greeting</label><input id="greeting" data-field="greeting" type="text" placeholder="Dear Hiring Manager,"></div>
     <div class="field"><label for="jobDescription">Job notes or description</label><textarea id="jobDescription" data-job-field="description" rows="4" placeholder="Paste key requirements here for reference. This is not shown in the letter."></textarea></div>
   </div></details>
-  <details class="editor-group" open><summary>Letter body</summary><div class="group-body"><p class="group-note">Aim for 250–400 words. Use specific examples and tailor each paragraph.</p><div class="paragraph-list" id="paragraphList"></div><button class="add-button" id="addParagraphButton" type="button">+ Add paragraph</button></div></details>
+  <details class="editor-group" open><summary>Letter body</summary><div class="group-body"><p class="group-note">Aim for 250–400 words. Use specific examples and tailor each paragraph.</p><div class="paragraph-list" id="paragraphList"></div><button class="add-button" id="generateAiButton" type="button">Generate with AI</button><button class="add-button" id="addParagraphButton" type="button">+ Add paragraph</button></div></details>
   <details class="editor-group" open><summary>Closing</summary><div class="group-body"><div class="field"><label for="signoff">Sign-off</label><input id="signoff" data-field="signoff" type="text" placeholder="Sincerely,"></div><div class="field"><label for="signatureName">Signature name</label><input id="signatureName" data-field="signatureName" type="text" autocomplete="name"></div></div></details>
 </aside>
 <section class="preview-area" aria-label="Cover letter preview">
@@ -72,6 +73,17 @@ details.editor-group{margin-bottom:10px;background:var(--paper);border:1px solid
 </section>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<dialog class="ai-preview-dialog" id="aiPreviewDialog" aria-labelledby="aiPreviewDialogTitle">
+  <div class="ai-preview-body">
+    <h2 id="aiPreviewDialogTitle">AI suggestions</h2>
+    <p>Review before inserting - nothing is saved until you choose Insert all. Edit any paragraph below first if you want.</p>
+    <div class="ai-preview-list" id="aiPreviewList"></div>
+    <div class="ai-preview-actions">
+      <button class="toolbar-button" id="aiPreviewDiscardButton" type="button">Discard</button>
+      <button class="toolbar-button primary" id="aiPreviewInsertButton" type="button">Insert all</button>
+    </div>
+  </div>
+</dialog>
 <script id="embeddedState">window.__COVER_LETTER_STATE__=null;</script>
 <script>
 const LIBRARY_KEY='coverLetterBuilderLibraryV1',AUTOSAVE_KEY='coverLetterBuilderAutosaveV1',PROFILE_KEY='resumeBuilderProfileV1';
@@ -209,6 +221,80 @@ $('addParagraphButton').addEventListener('click',addParagraph);$('resetButton').
 document.querySelector('.preview-area').addEventListener('click',e=>{const target=e.target.closest('[data-focus],[data-paragraph-focus]');if(target)focusInput(target)});document.querySelector('.preview-area').addEventListener('keydown',e=>{if(!['Enter',' '].includes(e.key))return;const target=e.target.closest('[data-focus],[data-paragraph-focus]');if(target){e.preventDefault();focusInput(target)}});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();clearTimeout(saveTimer);saveNow()}});addEventListener('beforeunload',()=>{if(saveTimer){clearTimeout(saveTimer);saveNow()}});
 $('themeToggleButton').addEventListener('click',toggleTheme);applyStoredTheme();window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(!storedThemePreference())syncThemeToggleUI()});window.addEventListener('storage',e=>{if(e.key===THEME_STORAGE_KEY)applyStoredTheme()});
+</script>
+
+<!--
+    Step 7: "Generate with AI" - its own script block, reusing this page's
+    own globals ($, state, collect, renderParagraphEditors, renderPreview,
+    scheduleSave, uid, showToast, PROFILE_KEY) rather than redefining
+    anything. Only works when this page is opened from the backend server
+    (http://127.0.0.1:8000/CoverLetter.html?letter=...), not from a
+    double-clicked file - see backend/main.py.
+-->
+<script>
+function readFullProfile(){
+  // Read-only. readProfile() above already reads this key for contact
+  // fields only - this reads the SAME key in full (work history,
+  // achievements, hobbies) to give the AI real context. Never written to.
+  try{return JSON.parse(localStorage.getItem(PROFILE_KEY)||'null')||{}}catch(e){return{}}
+}
+
+async function requestAIGeneration(url,body){
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.detail||`Request failed (HTTP ${response.status})`);
+  return data;
+}
+
+function showAiPreview(paragraphs){
+  const list=$('aiPreviewList');
+  list.replaceChildren();
+  paragraphs.forEach((p,i)=>{
+    const existingIndex=state.paragraphs.findIndex(sp=>sp.id===p.id);
+    const field=document.createElement('div');field.className='field';
+    const label=document.createElement('label');
+    label.textContent=existingIndex>=0?`Paragraph ${existingIndex+1} (replacing existing)`:`New paragraph`;
+    const area=document.createElement('textarea');area.rows=5;area.dataset.previewId=p.id;area.value=p.text;
+    field.append(label,area);list.append(field);
+  });
+  $('aiPreviewDialog').showModal();
+}
+
+async function generateCoverLetterParagraphs(){
+  const button=$('generateAiButton'),originalLabel=button.textContent;
+  button.disabled=true;button.textContent='Generating…';
+  try{
+    state=collect();
+    const data=await requestAIGeneration('/api/generate/cover-letter-paragraphs',{
+      job_title:state.jobInfo.title,
+      job_company:state.jobInfo.company,
+      hiring_manager:state.jobInfo.hiringManager,
+      job_description:state.jobInfo.description,
+      existing_paragraphs:state.paragraphs,
+      profile:readFullProfile()
+    });
+    showAiPreview(data.paragraphs);
+  }catch(error){
+    showToast(error.message||'Something went wrong.');
+  }finally{
+    button.disabled=false;button.textContent=originalLabel;
+  }
+}
+
+$('aiPreviewInsertButton').addEventListener('click',()=>{
+  state=collect();
+  $('aiPreviewList').querySelectorAll('textarea[data-preview-id]').forEach(area=>{
+    const id=area.dataset.previewId,text=area.value;
+    const existing=state.paragraphs.find(p=>p.id===id);
+    if(existing){existing.text=text}else{state.paragraphs.push({id:uid(),text})}
+  });
+  renderParagraphEditors();renderPreview();scheduleSave();
+  $('aiPreviewDialog').close();
+  showToast('Inserted.');
+});
+
+$('aiPreviewDiscardButton').addEventListener('click',()=>{$('aiPreviewDialog').close()});
+$('generateAiButton').addEventListener('click',generateCoverLetterParagraphs);
 </script>
 </body>
 </html>

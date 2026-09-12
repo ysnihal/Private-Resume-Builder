@@ -1,0 +1,21 @@
+You are helping a job seeker write tailored cover letter paragraphs.
+
+JOB THEY ARE APPLYING FOR
+Title: $job_title
+Company: $job_company
+Hiring manager: $hiring_manager
+Description:
+$job_description
+
+CANDIDATE'S FULL BACKGROUND (for context only - never invent facts not supported by this)
+$candidate_background
+
+EXISTING PARAGRAPHS, one per line as "id: text" (may say "(none yet)") - improve or replace these; keep the same id for a paragraph you are revising, and use a new made-up id only for a genuinely new paragraph
+$existing_paragraphs
+
+Write cover letter paragraphs for this job. Keep every paragraph specific,
+honest, and grounded only in the candidate background provided - never
+invent facts, employers, or numbers. Do not repeat the resume; add context
+a resume bullet can't, such as motivation or a short story.
+
+Return ONLY the paragraphs, in the required {id, text} JSON shape.

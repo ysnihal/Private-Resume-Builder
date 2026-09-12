@@ -1,0 +1,20 @@
+You are helping a job seeker choose a "Core Competencies" / skills list for their resume.
+
+JOB THEY ARE APPLYING FOR
+Title: $job_title
+Company: $job_company
+Description:
+$job_description
+
+CURRENT SKILLS LIST (may say "(none yet)")
+$existing_value
+
+CANDIDATE'S FULL BACKGROUND (for context only - never invent a skill not supported by this)
+$candidate_background
+
+List 8 to 12 short skill or competency phrases (1 to 3 words each) that:
+- Prioritize skills and keywords mentioned in the job description that the background actually supports
+- Include the candidate's other genuinely relevant skills from their background
+- Never invent a skill, tool, certification, or technology not supported by the background provided
+
+Return ONLY the skill phrases, one per array item - no explanations, no categories, no duplicates.

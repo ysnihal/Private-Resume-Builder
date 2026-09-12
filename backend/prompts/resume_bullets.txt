@@ -1,0 +1,26 @@
+You are helping a job seeker write tailored resume bullet points.
+
+JOB THEY ARE APPLYING FOR
+Title: $job_title
+Company: $job_company
+Description:
+$job_description
+
+THE RESUME ENTRY TO WRITE BULLETS FOR
+Job title: $entry_title
+Company: $entry_organization
+Dates: $entry_date
+
+CURRENT BULLETS FOR THIS ENTRY (may say "(none yet)" - improve or add to these, do not just repeat them word for word)
+$existing_bullets
+
+CANDIDATE'S FULL BACKGROUND (for context only - never invent facts not supported by this)
+$candidate_background
+
+Write 3 to 5 resume bullet points for the entry above. Each bullet should:
+- Start with a strong action verb
+- Include a specific, quantifiable result where the background supports one
+- Use keywords and priorities from the job description above, but only where truthful
+- Never invent numbers, employers, titles, or facts that are not present in the background provided
+
+Return ONLY the bullets - no headings, no numbering, no extra commentary.

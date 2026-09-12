@@ -1852,6 +1852,12 @@
             font-weight: 700;
         }
 
+        /* Keeps a hyphenated compound word (e.g. "customer-centric") from
+           line-wrapping at its own hyphen. See appendTextWithProtectedHyphens. */
+        .no-break-hyphen {
+            white-space: nowrap;
+        }
+
         .institution-middle {
             text-align: center;
             font-weight: 700;
@@ -1891,6 +1897,15 @@
         .resume-section,
         .resume-entry {
             display: flow-root;
+            /* Matches .preview-header's `position: relative` (needed for its
+               ::after accent line) so every top-level block on a resume page
+               shares the same CSS paint bucket. Without this, browsers paint
+               positioned boxes after all static in-flow siblings regardless
+               of DOM order, which writes the name/contact header into the
+               PDF's text stream after the sections that follow it on the
+               page — invisible on screen, but it scrambles reading order for
+               anything that extracts text (ATS parsers, copy/paste). */
+            position: relative;
         }
 
         .resume-pages {
@@ -2739,6 +2754,7 @@
 
             <div class="context-group" id="fieldContextGroup" hidden>
                 <button class="context-action" id="contextDefaultButton" type="button">Save as default</button>
+                <button class="context-action" id="contextFieldGenerateAIButton" type="button" hidden>Generate with AI</button>
                 <button class="context-action" id="contextVisibilityButton" type="button">Hide from resume</button>
                 <button class="context-action" id="contextOpenLinkButton" type="button" hidden>Open link</button>
                 <button class="context-action" id="contextClearButton" type="button">Clear value</button>
@@ -2768,6 +2784,7 @@
                 </div>
                 <button class="context-action" id="contextEntryDuplicateButton" type="button">Duplicate entry</button>
                 <button class="context-action" id="contextEntryAddBulletButton" type="button">Add bullet</button>
+                <button class="context-action" id="contextEntryGenerateAIButton" type="button" hidden>Generate bullets with AI</button>
                 <button class="context-action danger-action" id="contextEntryDeleteButton" type="button">Delete entry</button>
             </div>
 
@@ -2827,6 +2844,10 @@
     <div class="undo-toast" id="undoToast" role="status" aria-live="polite" hidden>
         <span id="undoToastMessage">Item removed</span>
         <button id="undoToastButton" type="button">Undo</button>
+    </div>
+
+    <div class="undo-toast" id="aiStatusToast" role="status" aria-live="polite" hidden>
+        <span id="aiStatusToastMessage"></span>
     </div>
 
     <div class="preview-container resume-source" id="resumePreview" aria-hidden="true">
@@ -2927,6 +2948,20 @@
             </dl>
             <div class="utility-dialog-actions">
                 <button class="btn utility-primary-button" id="closeShortcutsButton" type="button">Done</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog class="utility-dialog" id="aiPreviewDialog" aria-labelledby="aiPreviewDialogTitle">
+        <div class="utility-dialog-form">
+            <div class="utility-dialog-header">
+                <h2 id="aiPreviewDialogTitle">AI suggestion</h2>
+                <p>Review before inserting - nothing is saved until you choose Insert. You can still edit it afterward like anything else.</p>
+            </div>
+            <textarea id="aiPreviewText" rows="10"></textarea>
+            <div class="utility-dialog-actions">
+                <button class="btn btn-secondary" id="aiPreviewDiscardButton" type="button">Discard</button>
+                <button class="btn utility-primary-button" id="aiPreviewInsertButton" type="button">Insert</button>
             </div>
         </div>
     </dialog>
@@ -3974,16 +4009,45 @@
                 .filter(Boolean);
         }
 
+        // Browsers treat any existing "-" as a legal line-wrap point, so a
+        // hyphenated compound word (e.g. "customer-centric") that lands at a
+        // line's edge can wrap right after the hyphen. On screen that's
+        // invisible; extracted (copy/paste, ATS parsing) it reads as
+        // "customer- centric". This wraps such compounds in a no-wrap span
+        // — same characters, same textContent, just never split mid-word —
+        // without touching the underlying hyphen character itself.
+        const COMPOUND_HYPHEN_PATTERN = /[^\s-]+(?:-[^\s-]+)+/g;
+
+        function appendTextWithProtectedHyphens(parent, text) {
+            COMPOUND_HYPHEN_PATTERN.lastIndex = 0;
+            let lastIndex = 0;
+            let match;
+
+            while ((match = COMPOUND_HYPHEN_PATTERN.exec(text))) {
+                if (match.index > lastIndex) {
+                    parent.append(document.createTextNode(text.slice(lastIndex, match.index)));
+                }
+                parent.append(el('span', 'no-break-hyphen', match[0]));
+                lastIndex = COMPOUND_HYPHEN_PATTERN.lastIndex;
+            }
+
+            if (lastIndex < text.length) {
+                parent.append(document.createTextNode(text.slice(lastIndex)));
+            }
+        }
+
         function appendFormattedLine(parent, line) {
             const colonIndex = line.indexOf(':');
 
             if (colonIndex > 0) {
-                const strong = el('span', 'bold-section', `${line.slice(0, colonIndex)}:`);
-                parent.append(strong, document.createTextNode(line.slice(colonIndex + 1)));
+                const strong = el('span', 'bold-section');
+                appendTextWithProtectedHyphens(strong, `${line.slice(0, colonIndex)}:`);
+                parent.append(strong);
+                appendTextWithProtectedHyphens(parent, line.slice(colonIndex + 1));
                 return;
             }
 
-            parent.append(document.createTextNode(line));
+            appendTextWithProtectedHyphens(parent, line);
         }
 
         function renderFormattedText(element, text) {
@@ -4730,6 +4794,10 @@
 
             hideContextGroups();
             controls.fieldContextGroup.hidden = false;
+            const generateFieldButton = document.getElementById('contextFieldGenerateAIButton');
+            if (generateFieldButton) {
+                generateFieldButton.hidden = field.id !== 'summary' && field.id !== 'skills';
+            }
             if (field.id === 'skills') {
                 controls.competencyContextGroup.hidden = false;
                 controls.competencyColumns.value = competencySettings.columns;
@@ -4812,6 +4880,10 @@
             selectedContext = { type: 'entry', target, sectionItem, entrySelection: selection };
             hideContextGroups();
             controls.entryContextGroup.hidden = false;
+            const generateBulletsButton = document.getElementById('contextEntryGenerateAIButton');
+            if (generateBulletsButton) {
+                generateBulletsButton.hidden = selection.config.key !== 'experience';
+            }
             controls.contextType.textContent = 'Resume entry';
             controls.contextTitle.textContent = selection.item.source.title.value.trim() || 'Untitled entry';
             controls.contextDescription.textContent = sectionItem?.heading.textContent || 'Structured resume entry';
@@ -6370,7 +6442,8 @@
             }
 
             items.forEach(({ line, index }) => {
-                const item = el('li', '', line);
+                const item = el('li');
+                appendTextWithProtectedHyphens(item, line);
                 if (sourceId) {
                     item.dataset.editField = sourceId;
                     item.dataset.editLabel = element.dataset.editLabel || 'List item';
@@ -8274,6 +8347,161 @@
                 paginateResume();
             });
         }
+    </script>
+
+    <!--
+        Step 7: "Generate with AI" - kept in its own script block, separate
+        from the big one above, and reusing that script's own globals
+        ($, selectedContext, jobInfo, recordHistory, saveDefaultValue,
+        generateResumeNow, markResumeChanged, clearEditorSelection,
+        splitLines) rather than redefining anything. This only works when
+        this page is opened from the backend server
+        (http://127.0.0.1:8000/Resume.html?resume=...), not when the file
+        is double-clicked open - see backend/main.py.
+    -->
+    <script>
+        const AI_STATUS_TOAST = $('aiStatusToast');
+        const AI_STATUS_TOAST_MESSAGE = $('aiStatusToastMessage');
+        let aiStatusToastTimer = 0;
+
+        function showAiStatus(message, isError = false) {
+            AI_STATUS_TOAST_MESSAGE.textContent = message;
+            AI_STATUS_TOAST.hidden = false;
+            AI_STATUS_TOAST.style.background = isError ? 'var(--danger, #a12b2b)' : '';
+            if (aiStatusToastTimer) {
+                window.clearTimeout(aiStatusToastTimer);
+            }
+            aiStatusToastTimer = window.setTimeout(() => {
+                AI_STATUS_TOAST.hidden = true;
+                AI_STATUS_TOAST.style.background = '';
+            }, isError ? 8000 : 4000);
+        }
+
+        function readFullProfile() {
+            // Read-only: Resume.html has never stored anything under this
+            // key and must never start now. This is only ever sent to our
+            // own backend as context for the AI.
+            try {
+                return JSON.parse(localStorage.getItem('resumeBuilderProfileV1') || 'null') || {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        async function requestAIGeneration(url, body) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.detail || `Request failed (HTTP ${response.status})`);
+            }
+            return data;
+        }
+
+        async function withButtonLoading(button, loadingLabel, task) {
+            const originalLabel = button.textContent;
+            button.disabled = true;
+            button.textContent = loadingLabel;
+            try {
+                await task();
+            } catch (error) {
+                showAiStatus(error.message || 'Something went wrong.', true);
+            } finally {
+                button.disabled = false;
+                button.textContent = originalLabel;
+            }
+        }
+
+        // --- Resume bullets: appends directly, same as the manual "Add
+        // bullet" button - appending is safe, nothing existing is
+        // overwritten, so no preview step is needed here.
+        $('contextEntryGenerateAIButton').addEventListener('click', () => {
+            if (selectedContext?.type !== 'entry' || selectedContext.entrySelection.config.key !== 'experience') {
+                return;
+            }
+            const button = $('contextEntryGenerateAIButton');
+            const { source } = selectedContext.entrySelection.item;
+
+            withButtonLoading(button, 'Generating…', async () => {
+                const data = await requestAIGeneration('/api/generate/resume-bullets', {
+                    job_title: jobInfo.title,
+                    job_company: jobInfo.company,
+                    job_description: jobInfo.description,
+                    entry_title: source.title.value,
+                    entry_organization: source.organization.value,
+                    entry_date: source.date.value,
+                    existing_bullets: splitLines(source.notes.value).filter(Boolean),
+                    profile: readFullProfile()
+                });
+
+                recordHistory();
+                const lines = splitLines(source.notes.value).filter(Boolean);
+                data.bullets.forEach((bullet) => lines.push(bullet));
+                source.notes.value = lines.join('\n');
+                saveDefaultValue(source.notes);
+                generateResumeNow();
+                markResumeChanged();
+                // Content may have re-paginated (moved across pages), which
+                // can leave the old selection pointing at a removed element -
+                // close the panel cleanly rather than risk a stale reference.
+                clearEditorSelection();
+                showAiStatus(`Added ${data.bullets.length} bullet${data.bullets.length === 1 ? '' : 's'}.`);
+            });
+        });
+
+        // --- Resume Summary / Skills: these REPLACE the whole field, so
+        // unlike bullets, the result is shown for review first. Nothing is
+        // written until Insert is clicked.
+        let aiPendingField = null;
+
+        $('contextFieldGenerateAIButton').addEventListener('click', () => {
+            if (selectedContext?.type !== 'field') {
+                return;
+            }
+            const field = selectedContext.field;
+            if (field.id !== 'summary' && field.id !== 'skills') {
+                return;
+            }
+            const button = $('contextFieldGenerateAIButton');
+
+            withButtonLoading(button, 'Generating…', async () => {
+                const data = await requestAIGeneration('/api/generate/resume-field', {
+                    field: field.id,
+                    job_title: jobInfo.title,
+                    job_company: jobInfo.company,
+                    job_description: jobInfo.description,
+                    existing_value: field.value,
+                    profile: readFullProfile()
+                });
+
+                aiPendingField = field;
+                $('aiPreviewText').value = data.value;
+                $('aiPreviewDialog').showModal();
+            });
+        });
+
+        $('aiPreviewInsertButton').addEventListener('click', () => {
+            if (!aiPendingField) {
+                return;
+            }
+            recordHistory();
+            aiPendingField.value = $('aiPreviewText').value;
+            saveDefaultValue(aiPendingField);
+            generateResumeNow();
+            markResumeChanged();
+            clearEditorSelection();
+            $('aiPreviewDialog').close();
+            aiPendingField = null;
+            showAiStatus('Inserted.');
+        });
+
+        $('aiPreviewDiscardButton').addEventListener('click', () => {
+            aiPendingField = null;
+            $('aiPreviewDialog').close();
+        });
     </script>
 </body>
 </html>
