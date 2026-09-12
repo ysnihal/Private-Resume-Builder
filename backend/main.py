@@ -27,10 +27,11 @@ from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
+from .auth import require_app_password
 from .errors import STATUS_BY_KIND, FriendlyError
 from .profile_format import format_candidate_background
 from .prompts import load_prompt
@@ -48,7 +49,9 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 # which would expose backend/.env and your real API key to the browser.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-app = FastAPI(title="Career Studio Backend")
+# dependencies=[...] applies to every route below, including the HTML
+# pages - see backend/auth.py for why this is a no-op locally.
+app = FastAPI(title="Career Studio Backend", dependencies=[Depends(require_app_password)])
 
 
 class TestResponse(BaseModel):

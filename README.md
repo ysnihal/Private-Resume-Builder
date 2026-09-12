@@ -77,8 +77,10 @@ This repo includes `render.yaml`, a Blueprint Render reads automatically:
 1. Push this repo to GitHub (already done if you're reading this from there).
 2. On [render.com](https://render.com), sign up/log in, then **New +** → **Blueprint**.
 3. Connect this GitHub repo. Render reads `render.yaml` and pre-fills the service.
-4. It will prompt for the env vars marked secret in `render.yaml` (at minimum `GEMINI_API_KEY`) - paste in your real key. These are stored by Render, not in the repo.
-5. Deploy. Once live, Render gives you a URL like `https://career-studio.onrender.com` - open `<that-url>/index.html`.
+4. It will prompt for the env vars marked secret in `render.yaml` - paste in your real `GEMINI_API_KEY`, **and set `APP_PASSWORD` to a password of your choosing.** These are stored by Render, not in the repo.
+5. Deploy. Once live, Render gives you a URL like `https://career-studio.onrender.com` - open `<that-url>/index.html`. Your browser will prompt for a username (anything) and the `APP_PASSWORD` you set.
+
+**Why the password matters:** this app has no login system of its own and a real API key on the server. Without `APP_PASSWORD` set, anyone who finds your deployed URL could use your AI quota (or run up real cost on a paid key). Locally, leave `APP_PASSWORD` blank in `.env` - no password prompt during development. See `backend/auth.py`.
 
 Free-tier services on Render sleep after inactivity and take ~30-60 seconds to wake on the next request - normal, not a bug.
 

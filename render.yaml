@@ -27,3 +27,5 @@ services:
         sync: false
       - key: GROQ_MODEL
         value: openai/gpt-oss-20b
+      - key: APP_PASSWORD
+        sync: false
